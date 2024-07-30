@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>عرض الرقم من الويب سوكيت</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            text-align: center;
+            color: #FF0000; /* لون النص */
+            background: #000;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .container {
+            padding: 30px;
+            background-color: rgba(0, 0, 0, 0.79);
+            border-radius: 15px;
+            max-width: 90%;
+            margin: 20px;
+            box-shadow: 0 4px 20px rgba(255, 255, 255, 1);
+        }
+        .logo {
+            max-width: 80%;
+            height: auto;
+            margin-bottom: 20px;
+            border-radius: 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+        }
+        #loadingSpinner {
+            display: none;
+            font-size: 1.5em;
+            margin-top: 20px;
+            color: #ff6347; /* لون التحميل */
+        }
+        #crashValue {
+            font-size: 3.5em;
+            margin: 15px 0;
+            padding: 15px;
+            background-color: rgba(0, 0, 0, 0.9);
+            border: 3px solid #FF0000; /* لو الحدود */
+            border-radius: 10px;
+            color: #ffffff;
+            line-height: 80px;
+        }
+        .link-box {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: rgba(0, 0, 0, 0.9);
+            border: 2px solid #960005; /* لون الحدود */
+            border-radius: 10px;
+            color: #005FFF;
+            font-size: 1.2em;
+        }
+        .link-box a {
+            color: #F7FF00; /* لون الرابط */
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .link-box a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <img src="jackx.png" alt="شعار" class="logo"> <!-- استبدل بمسار الصورة المحلي -->
+    
+    <div id="loadingSpinner">
+        <i class="fas fa-spinner fa-spin"></i>
+    </div>
+
+    <div id="crashValue">0.00</div>
+    
+    <div class="link-box">
+        <a href="https://t.me/Jack_X_1" target="_blank">https://t.me/Jack_X_1</a>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    var ws = null;
+    var توقعاتسابقة = [];
+    var currentIndex = 0;
+
+    function openWebSocket() {
+        var url = 'wss://megapari.com/games-frame/sockets/crash?whence=114&fcountry=66&ref=192&gr=825&appGuid=00000000-0000-0000-0000-000000000000&lng=ar';
+        ws = new WebSocket(url);
+        ws.onopen = function() {
+            console.log('WebSocket opened');
+            ws.send('{"protocol":"json","version":1}\x1e');
+            ws.send('{"arguments":[{"activity":30,"currency":119}],"invocationId":"0","target":"Guest","type":1}\x1e');
+        };
+        ws.onclose = function() {
+            console.log('WebSocket closed');
+            ws = null;
+        };
+        ws.onmessage = function(event) {
+            var data = JSON.parse(event.data.slice(0, -1));
+            if (data.target === 'OnCrash') {
+                توقعاتسابقة.push(data.arguments[0].f);
+                document.getElementById('loadingSpinner').style.display = 'none';
+                عرضالتوقعالتالي();
+            }
+        };
+        ws.onerror = function(event) {
+            console.error('WebSocket error:', event);
+        };
+    }
+
+    function عرضالتوقعالتالي() {
+        if (currentIndex < توقعاتسابقة.length) {
+            var crashValueElement = document.getElementById('crashValue');
+            crashValueElement.innerText = توقعاتسابقة[currentIndex];
+            currentIndex++;
+        }
+    }
+
+    openWebSocket();
+
+    document.getElementById('loadingSpinner').style.display = 'block';
+
+</script>
+
+</body>
+</html>
